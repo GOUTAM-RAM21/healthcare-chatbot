@@ -2,9 +2,10 @@ services:
   - type: web
     name: healthcare-chatbot-backend
     env: python
+    runtime: python3.10
+    rootDir: backend
     buildCommand: pip install -r requirements.txt
     startCommand: uvicorn main:app --host 0.0.0.0 --port $PORT
-    rootDir: backend
     envVars:
       - key: GROQ_API_KEY
         sync: false
