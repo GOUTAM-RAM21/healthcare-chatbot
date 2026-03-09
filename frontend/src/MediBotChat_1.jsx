@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from "react";
 
-const API_URL = "https://healthcare-chatbot-backend.onrender.com/api/chat";
+const BACKEND_URL = "https://healthcare-chatbot-backend-86ob.onrender.com";
 
   "I have fever and headache, what should I do?",
   "What are symptoms of diabetes?",
