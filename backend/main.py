@@ -3,15 +3,22 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from typing import Optional, List
 from datetime import datetime, timedelta
-import ollama
+from groq import Groq
+from dotenv import load_dotenv
+import os
 import json
 
+load_dotenv()
+
 app = FastAPI(title="HealthCare AI Chatbot API", version="1.0.0")
+
+# Initialize Groq client
+client = Groq(api_key=os.getenv("GROQ_API_KEY"))
 
 # CORS - React frontend ke liye
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000", "http://localhost:5173"],
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -110,17 +117,15 @@ async def medical_chat(request: ChatRequest):
                 "content": "EMERGENCY DETECTED! Start your response with: '🚨 EMERGENCY: Please call 108 immediately!' then provide brief first-aid guidance."
             })
 
-        # Ollama se response lo
-        response = ollama.chat(
-            model="llama3",   # ya "mistral" ya "gemma2" - jo tumhare paas ho
+        # Groq se response lo
+        response = client.chat.completions.create(
+            model="llama-3.1-8b-instant",
             messages=messages,
-            options={
-                "temperature": 0.7,
-                "num_predict": 512,
-            }
+            max_tokens=1024,
+            temperature=0.7,
         )
 
-        reply = response["message"]["content"]
+        reply = response.choices[0].message.content
 
         # Suggested actions
         suggested_actions = []
@@ -142,7 +147,7 @@ async def medical_chat(request: ChatRequest):
     except Exception as e:
         raise HTTPException(
             status_code=500,
-            detail=f"AI service error: {str(e)}. Make sure Ollama is running!"
+            detail=f"AI service error: {str(e)}. Check your Groq API key!"
         )
 
 # ============================================================
@@ -176,16 +181,17 @@ async def symptom_check(request: SymptomRequest):
         Keep it brief and compassionate. Always recommend consulting a doctor.
         """
 
-        response = ollama.chat(
-            model="llama3",
+        response = client.chat.completions.create(
+            model="llama-3.1-8b-instant",
             messages=[
                 {"role": "system", "content": MEDICAL_SYSTEM_PROMPT},
                 {"role": "user", "content": prompt}
-            ]
+            ],
+            max_tokens=1024,
         )
 
         return {
-            "analysis": response["message"]["content"],
+            "analysis": response.choices[0].message.content,
             "disclaimer": "This is AI-generated general information only. Please consult a qualified doctor for proper diagnosis and treatment."
         }
 
@@ -199,18 +205,20 @@ async def symptom_check(request: SymptomRequest):
 def root():
     return {
         "status": "HealthCare AI Chatbot API is running!",
-        "ollama_model": "llama3",
+        "model": "llama-3.1-8b-instant (Groq)",
         "endpoints": ["/api/chat", "/api/symptom-check", "/docs"]
     }
 
 @app.get("/health")
 def health_check():
     try:
-        # Ollama connection check
-        ollama.list()
-        return {"status": "ok", "ollama": "connected"}
+        api_key = os.getenv("GROQ_API_KEY")
+        if api_key:
+            return {"status": "ok", "groq": "connected"}
+        else:
+            return {"status": "error", "groq": "API key not found"}
     except:
-        return {"status": "warning", "ollama": "not connected - start ollama first"}
+        return {"status": "error", "groq": "connection failed"}
 
 # ============================================================
 # APPOINTMENT BOOKING SYSTEM

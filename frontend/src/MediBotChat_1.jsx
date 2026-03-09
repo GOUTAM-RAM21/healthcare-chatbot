@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from "react";
 
-const BACKEND_URL = "";
+const BACKEND_URL = "http://localhost:8000";
 
 const QUICK_QUESTIONS = [
   "I have fever and headache, what should I do?",
@@ -105,7 +105,7 @@ export default function MediBotChat() {
         {
           id: Date.now() + 1,
           role: "assistant",
-          content: "⚠️ **Connection Error**\n\nCould not connect to AI service. Please make sure:\n1. Ollama is running (`ollama serve`)\n2. FastAPI backend is running (`uvicorn main:app --reload`)\n\nThen try again!",
+          content: `⚠️ **Connection Error**\n\nCould not connect to backend server at ${BACKEND_URL}/api/chat\n\nPlease make sure FastAPI backend is running:\n\`cd backend\`\n\`uvicorn main:app --reload --port 8000\`\n\nError: ${err.message}`,
           time: new Date(),
           isEmergency: false,
           isError: true,
