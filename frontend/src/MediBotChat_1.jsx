@@ -2,7 +2,7 @@ import { useState, useRef, useEffect } from "react";
 
 const BACKEND_URL = "https://healthcare-chatbot-backend-86ob.onrender.com";
 
-const suggestions = [
+const QUICK_QUESTIONS = [
   "I have fever and headache, what should I do?",
   "What are symptoms of diabetes?",
   "How to manage high blood pressure?",
