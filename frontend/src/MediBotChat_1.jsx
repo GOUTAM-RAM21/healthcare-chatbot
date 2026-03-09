@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from "react";
 
-const BACKEND_URL = "http://localhost:8000";
+const BACKEND_URL = "https://healthcare-chatbot-backend-86ob.onrender.com";
 
 const QUICK_QUESTIONS = [
   "I have fever and headache, what should I do?",
